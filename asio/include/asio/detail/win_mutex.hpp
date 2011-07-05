@@ -28,6 +28,8 @@
 namespace asio {
 namespace detail {
 
+class win_condition_variable;
+
 class win_mutex
   : private noncopyable
 {
@@ -61,6 +63,7 @@ private:
   // C++ exceptions in the same function.
   ASIO_DECL int do_init();
 
+  friend class win_condition_variable;
   ::CRITICAL_SECTION crit_section_;
 };
 
