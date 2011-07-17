@@ -20,9 +20,10 @@
 
 #if defined(ASIO_HAS_IOCP)
 
-#include <vector>
+#include <cstddef>
 #include <boost/scoped_ptr.hpp>
 #include "asio/io_service.hpp"
+#include "asio/detail/array.hpp"
 #include "asio/detail/thread.hpp"
 #include "asio/detail/mutex.hpp"
 #include "asio/detail/condition_variable.hpp"
@@ -96,10 +97,13 @@ private:
   condition_variable cond_;
 
   // Handles WaitForMultipleObjects is called for.
-  std::vector<HANDLE> handles_;
+  array<HANDLE, MAXIMUM_WAIT_OBJECTS + 1> handles_;
 
   // Pending operations.
-  std::vector<win_wfmo_operation*> ops_;
+  array<win_wfmo_operation*, MAXIMUM_WAIT_OBJECTS - 1> ops_;
+
+  // Number of handles and pending operations.
+  std::size_t count_;
 };
 
 } // namespace detail
