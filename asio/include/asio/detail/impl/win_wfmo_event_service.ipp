@@ -89,7 +89,7 @@ void win_wfmo_event_service::cancel(HANDLE handle)
   asio::detail::mutex::scoped_lock lock(mutex_);
   interrupt();
   cond_.wait(lock);
-  for (std::size_t i = 2; i < handles_.size(); ++i)
+  for (std::size_t i = 2; i < count_; ++i)
   {
     if (handles_[i] == handle)
     {
