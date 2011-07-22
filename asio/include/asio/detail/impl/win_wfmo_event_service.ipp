@@ -69,6 +69,11 @@ void win_wfmo_event_service::work_started()
 void win_wfmo_event_service::on_pending(win_wfmo_operation* op)
 {
   asio::detail::mutex::scoped_lock lock(mutex_);
+  if (count_ == MAXIMUM_WAIT_OBJECTS)
+  {
+    io_service_impl_.on_completion(op, asio::error::invalid_argument);
+    return;
+  }
   start_service();
   interrupt();
   cond_.wait(lock);

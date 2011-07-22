@@ -40,6 +40,10 @@ class win_wfmo_event_service
   : public asio::detail::service_base<win_wfmo_event_service>
 {
 public:
+  // The maximum number of concurrent pending operations supported.
+  BOOST_STATIC_CONSTANT(std::size_t,
+      max_operations = MAXIMUM_WAIT_OBJECTS - 2);
+
   // Constructor.
   ASIO_DECL win_wfmo_event_service(asio::io_service& io_service);
 
@@ -97,10 +101,10 @@ private:
   condition_variable cond_;
 
   // Handles WaitForMultipleObjects is called for.
-  array<HANDLE, MAXIMUM_WAIT_OBJECTS + 1> handles_;
+  array<HANDLE, MAXIMUM_WAIT_OBJECTS> handles_;
 
   // Pending operations.
-  array<win_wfmo_operation*, MAXIMUM_WAIT_OBJECTS - 1> ops_;
+  array<win_wfmo_operation*, MAXIMUM_WAIT_OBJECTS - 2> ops_;
 
   // Number of handles and pending operations.
   std::size_t count_;
