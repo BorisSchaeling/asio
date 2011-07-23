@@ -92,20 +92,23 @@ void win_wfmo_event_service::on_completion(win_wfmo_operation* op,
 void win_wfmo_event_service::cancel(HANDLE handle)
 {
   asio::detail::mutex::scoped_lock lock(mutex_);
-  interrupt();
-  cond_.wait(lock);
-  for (std::size_t i = 2; i < count_; ++i)
+  if (count_)
   {
-    if (handles_[i] == handle)
+    interrupt();
+    cond_.wait(lock);
+    for (std::size_t i = 2; i < count_; ++i)
     {
-      on_completion(ops_[i - 2], asio::error::operation_aborted);
-      std::swap(handles_[i], handles_[count_ - 1]);
-      std::swap(ops_[i - 2], ops_[count_ - 3]);
-      --count_;
-      break;
+      if (handles_[i] == handle)
+      {
+        on_completion(ops_[i - 2], asio::error::operation_aborted);
+        std::swap(handles_[i], handles_[count_ - 1]);
+        std::swap(ops_[i - 2], ops_[count_ - 3]);
+        --count_;
+        break;
+      }
     }
+    cond_.notify_all();
   }
-  cond_.notify_all();
 }
 
 std::size_t win_wfmo_event_service::pending_operations()
@@ -137,7 +140,7 @@ void win_wfmo_event_service::start_service()
     }
     count_ = 2;
     work_thread_.reset(new asio::detail::thread(
-        worker_thread_function(this)));
+        worker_thread_function(this), 65536));
   }
 }
 

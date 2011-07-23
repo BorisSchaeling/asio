@@ -69,6 +69,8 @@ asio::error_code win_wfmo_handle_service::close(
 {
   if (is_open(impl))
   {
+    wfmo_service_.cancel(impl.handle_);
+
     if (!::CloseHandle(impl.handle_))
     {
       DWORD last_error = ::GetLastError();
