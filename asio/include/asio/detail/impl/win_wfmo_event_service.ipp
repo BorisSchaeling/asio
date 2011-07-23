@@ -108,6 +108,12 @@ void win_wfmo_event_service::cancel(HANDLE handle)
   cond_.notify_all();
 }
 
+std::size_t win_wfmo_event_service::pending_operations()
+{
+  asio::detail::mutex::scoped_lock lock(mutex_);
+  return count_ > 2 ? count_ - 2 : 0;
+}
+
 void win_wfmo_event_service::start_service()
 {
   if (!work_thread_)
@@ -195,7 +201,7 @@ void win_wfmo_event_service::work_thread()
       --count_;
     }
     else if (res >= WAIT_ABANDONED_0 &&
-        res < WAIT_ABANDONED_0 + handles_.size())
+        res < WAIT_ABANDONED_0 + count_)
     {
       asio::detail::mutex::scoped_lock lock(mutex_);
       on_completion(ops_[res - WAIT_ABANDONED_0 - 2],

@@ -67,6 +67,9 @@ public:
   // Cancel pending asynchronous operations.
   ASIO_DECL void cancel(HANDLE handle);
 
+  // Return number of pending asynchronous operations.
+  ASIO_DECL std::size_t pending_operations();
+
 private:
   // Called when first operation is started and background thread must
   // be started to call WaitForMultipleObjects.
