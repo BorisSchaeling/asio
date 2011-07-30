@@ -21,10 +21,10 @@
 #if defined(ASIO_HAS_WINDOWS_OBJECT_HANDLE) \
   || defined(GENERATING_DOCUMENTATION)
 
+#include "asio/detail/throw_error.hpp"
 #include "asio/error.hpp"
 #include "asio/windows/basic_handle.hpp"
 #include "asio/windows/object_handle_service.hpp"
-#include "asio/detail/throw_error.hpp"
 
 #include "asio/detail/push_options.hpp"
 
@@ -77,6 +77,43 @@ public:
     : basic_handle<ObjectHandleService>(io_service, native_handle)
   {
   }
+
+#if defined(ASIO_HAS_MOVE) || defined(GENERATING_DOCUMENTATION)
+  /// Move-construct a basic_object_handle from another.
+  /**
+   * This constructor moves an object handle from one object to another.
+   *
+   * @param other The other basic_object_handle object from which the
+   * move will occur.
+   *
+   * @note Following the move, the moved-from object is in the same state as if
+   * constructed using the @c basic_object_handle(io_service&) constructor.
+   */
+  basic_object_handle(basic_object_handle&& other)
+    : basic_handle<ObjectHandleService>(
+        ASIO_MOVE_CAST(basic_object_handle)(other))
+  {
+  }
+
+  /// Move-assign a basic_object_handle from another.
+  /**
+   * This assignment operator moves an object handle from one object to
+   * another.
+   *
+   * @param other The other basic_object_handle object from which the
+   * move will occur.
+   *
+   * @note Following the move, the moved-from object is in the same state as if
+   * constructed using the @c basic_object_handle(io_service&)
+   * constructor.
+   */
+  basic_object_handle& operator=(basic_object_handle&& other)
+  {
+    basic_handle<ObjectHandleService>::operator=(
+        ASIO_MOVE_CAST(basic_object_handle)(other));
+    return *this;
+  }
+#endif // defined(ASIO_HAS_MOVE) || defined(GENERATING_DOCUMENTATION)
 
   /// Perform a blocking wait on the object handle.
   /**

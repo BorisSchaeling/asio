@@ -291,9 +291,9 @@
 
 // Windows: object handles.
 #if !defined(ASIO_DISABLE_WINDOWS_OBJECT_HANDLE)
-# if defined(ASIO_HAS_IOCP)
+# if defined(BOOST_WINDOWS) || defined(__CYGWIN__)
 #  define ASIO_HAS_WINDOWS_OBJECT_HANDLE 1
-# endif // defined(ASIO_HAS_IOCP)
+# endif // defined(BOOST_WINDOWS) || defined(__CYGWIN__)
 #endif // !defined(ASIO_DISABLE_WINDOWS_OBJECT_HANDLE)
 
 // Windows: OVERLAPPED wrapper.

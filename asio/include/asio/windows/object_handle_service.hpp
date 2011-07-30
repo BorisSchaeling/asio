@@ -21,7 +21,7 @@
 #if defined(ASIO_HAS_WINDOWS_OBJECT_HANDLE) \
   || defined(GENERATING_DOCUMENTATION)
 
-#include "asio/detail/win_wfmo_handle_service.hpp"
+#include "asio/detail/win_wait_object_service.hpp"
 #include "asio/error.hpp"
 #include "asio/io_service.hpp"
 
@@ -38,7 +38,7 @@ class object_handle_service
   : public asio::detail::service_base<object_handle_service>
 #endif
 {
-private:
+public:
 #if defined(GENERATING_DOCUMENTATION)
   /// The unique service identifier.
   static asio::io_service::id id;
@@ -46,19 +46,19 @@ private:
 
 private:
   // The type of the platform-specific implementation.
-  typedef detail::win_wfmo_handle_service service_impl_type;
+  typedef detail::win_wait_object_service service_impl_type;
 
 public:
-/// The type of an object handle implementation.
+  /// The type of an object handle implementation.
 #if defined(GENERATING_DOCUMENTATION)
   typedef implementation_defined implementation_type;
 #else
   typedef service_impl_type::implementation_type implementation_type;
 #endif
 
-/// The native handle type.
+  /// The native handle type.
 #if defined(GENERATING_DOCUMENTATION)
-  typedef implementation_defined native_type;
+  typedef implementation_defined native_handle_type;
 #else
   typedef service_impl_type::native_handle_type native_handle_type;
 #endif
@@ -70,17 +70,28 @@ public:
   {
   }
 
-  /// Destroy all user-defined handler objects owned by the service.
-  void shutdown_service()
-  {
-    service_impl_.shutdown_service();
-  }
-
   /// Construct a new object handle implementation.
   void construct(implementation_type& impl)
   {
     service_impl_.construct(impl);
   }
+
+#if defined(ASIO_HAS_MOVE) || defined(GENERATING_DOCUMENTATION)
+  /// Move-construct a new object handle implementation.
+  void move_construct(implementation_type& impl,
+      implementation_type& other_impl)
+  {
+    service_impl_.move_construct(impl, other_impl);
+  }
+
+  /// Move-assign from another object handle implementation.
+  void move_assign(implementation_type& impl,
+      random_access_handle_service& other_service,
+      implementation_type& other_impl)
+  {
+    service_impl_.move_assign(impl, other_service.service_impl_, other_impl);
+  }
+#endif // defined(ASIO_HAS_MOVE) || defined(GENERATING_DOCUMENTATION)
 
   /// Destroy an object handle implementation.
   void destroy(implementation_type& impl)
@@ -90,9 +101,9 @@ public:
 
   /// Assign an existing native handle to an object handle.
   asio::error_code assign(implementation_type& impl,
-      const native_handle_type& native_handle, asio::error_code& ec)
+      const native_handle_type& handle, asio::error_code& ec)
   {
-    return service_impl_.assign(impl, native_handle, ec);
+    return service_impl_.assign(impl, handle, ec);
   }
 
   /// Determine whether the handle is open.
@@ -129,12 +140,19 @@ public:
 
   /// Start an asynchronous wait.
   template <typename WaitHandler>
-  void async_wait(implementation_type& impl, WaitHandler handler)
+  void async_wait(implementation_type& impl,
+      ASIO_MOVE_ARG(WaitHandler) handler)
   {
-    service_impl_.async_wait(impl, handler);
+    service_impl_.async_wait(impl, ASIO_MOVE_CAST(WaitHandler)(handler));
   }
 
 private:
+  // Destroy all user-defined handler objects owned by the service.
+  void shutdown_service()
+  {
+    service_impl_.shutdown_service();
+  }
+
   // The platform-specific implementation.
   service_impl_type service_impl_;
 };

@@ -161,7 +161,7 @@ void win_iocp_handle_service::destroy(
     win_iocp_handle_service::implementation_type& impl)
 {
   close_for_destruction(impl);
-  
+
   // Remove implementation from linked list of all implementations.
   asio::detail::mutex::scoped_lock lock(mutex_);
   if (impl_list_ == &impl)
