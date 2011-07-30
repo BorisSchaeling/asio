@@ -86,7 +86,7 @@ public:
 
   /// Move-assign from another object handle implementation.
   void move_assign(implementation_type& impl,
-      random_access_handle_service& other_service,
+      object_handle_service& other_service,
       implementation_type& other_impl)
   {
     service_impl_.move_assign(impl, other_service.service_impl_, other_impl);

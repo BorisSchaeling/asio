@@ -169,19 +169,7 @@ asio::error_code win_wait_object_service::close(
         InterlockedExchangePointer(impl.wait_handle_.get(), 0);
     if (wait_handle)
     {
-      if (!::UnregisterWait(wait_handle))
-      {
-        DWORD last_error = ::GetLastError();
-        if (last_error != ERROR_IO_PENDING)
-        {
-          InterlockedExchangePointer(impl.wait_handle_.get(),
-              wait_handle);
-          ec = asio::error_code(last_error,
-              asio::error::get_system_category());
-          return ec;
-        }
-      }
-
+      ::UnregisterWait(wait_handle);
       io_service_.work_finished();
     }
 
@@ -222,19 +210,7 @@ asio::error_code win_wait_object_service::cancel(
       InterlockedExchangePointer(impl.wait_handle_.get(), 0);
   if (wait_handle)
   {
-    if (!::UnregisterWait(wait_handle))
-    {
-      DWORD last_error = ::GetLastError();
-      if (last_error != ERROR_IO_PENDING)
-      {
-        InterlockedExchangePointer(impl.wait_handle_.get(),
-            wait_handle);
-        ec = asio::error_code(last_error,
-            asio::error::get_system_category());
-        return ec;
-      }
-    }
-
+    ::UnregisterWait(wait_handle);
     io_service_.work_finished();
   }
   else

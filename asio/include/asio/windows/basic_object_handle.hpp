@@ -127,7 +127,7 @@ public:
   {
     asio::error_code ec;
     this->service.wait(this->implementation, ec);
-    asio::detail::throw_error(ec);
+    asio::detail::throw_error(ec, "wait");
   }
 
   /// Perform a blocking wait on the object handle.
